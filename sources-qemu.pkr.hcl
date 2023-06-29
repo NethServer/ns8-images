@@ -1,6 +1,6 @@
 source "qemu" "dn" {
-  iso_url      = "https://cloud.debian.org/images/cloud/bullseye/daily/20230403-1339/debian-11-generic-amd64-daily-20230403-1339.qcow2"
-  iso_checksum = "file:https://cloud.debian.org/images/cloud/bullseye/daily/20230403-1339/SHA512SUMS"
+  iso_url      = "https://cloud.debian.org/images/cloud/bookworm/20230612-1409/debian-12-generic-amd64-20230612-1409.qcow2"
+  iso_checksum = "file:https://cloud.debian.org/images/cloud/bookworm/20230612-1409/SHA512SUMS"
   disk_image   = true
   headless     = true
   disk_size    = "10G"
@@ -13,7 +13,7 @@ source "qemu" "dn" {
   shutdown_command     = "sudo shutdown -P now"
   disk_compression     = true
   output_directory     = "qemu_ns8_dn"
-  vm_name              = "ns8-debian-11-${var.core_version}.qcow2"
+  vm_name              = "ns8-debian-12-${var.core_version}.qcow2"
 }
 
 source "qemu" "rl" {
