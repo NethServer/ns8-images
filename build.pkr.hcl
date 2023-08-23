@@ -74,5 +74,48 @@ build {
     ]
   }
 
+  provisioner "file" {
+    only = ["qemu.dn"]
+    content     = <<-EOT
+network:
+    version: 2
+    ethernets:
+        all-en:
+            match:
+                name: en*
+            dhcp4: true
+            dhcp4-overrides:
+                use-domains: true
+            dhcp6: true
+            dhcp6-overrides:
+                use-domains: true
+        all-eth:
+            match:
+                name: eth*
+            dhcp4: true
+            dhcp4-overrides:
+                use-domains: true
+            dhcp6: true
+            dhcp6-overrides:
+                use-domains: true
+EOT
+destination = "/tmp/ns8-netplan-debian"
+  }
+
+  provisioner "shell" {
+    only = ["qemu.dn"]
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = ["mv /tmp/ns8-netplan-debian /etc/netplan/50-cloud-init.yaml"]
+  }
+
+  provisioner "shell" {
+    only = ["qemu.dn"]
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = [
+      "netplan generate",
+      "netplan apply",
+    ]
+  }
+
   post-processor "manifest" {}
 }
