@@ -74,6 +74,12 @@ build {
     ]
   }
 
+  provisioner "shell" {
+    only = ["qemu.dn"]
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = ["rm -f /etc/netplan/*"]
+  }
+
   provisioner "file" {
     only = ["qemu.dn"]
     content     = <<-EOT
