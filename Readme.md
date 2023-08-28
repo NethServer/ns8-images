@@ -12,7 +12,7 @@ Prerequisites
 
 Supported Distro:
 
-* Debian 11 (`qemu.dn`)
+* Debian 12 (`qemu.dn`)
 * Centos Stream 9.1 (`qemu.cs`)
 * RocKy Linux 9.1 (qemu.rl')
 * Alma Linux 9.1 (`qemu.al`)
