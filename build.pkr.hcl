@@ -2,12 +2,8 @@ build {
 
   sources = [
     "source.digitalocean.rl",
-    "source.digitalocean.cs",
-    "source.digitalocean.al",
     "source.qemu.dn",
-    "source.qemu.cs",
     "source.qemu.rl",
-    "source.qemu.al",
   ]
 
   provisioner "shell" {
