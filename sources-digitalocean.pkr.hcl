@@ -1,9 +1,9 @@
 source "digitalocean" "dn" {
-  image         = "debian-11-x64"
+  image         = "debian-12-x64"
   region        = "ams3"
   size          = "s-1vcpu-1gb"
   ssh_username  = "root"
-  snapshot_name = "ns8-debian-11-${var.core_version}"
+  snapshot_name = "ns8-debian-12-${var.core_version}"
 }
 
 source "digitalocean" "rl" {

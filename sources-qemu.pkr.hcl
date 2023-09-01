@@ -1,6 +1,6 @@
 source "qemu" "dn" {
-  iso_url      = "https://cloud.debian.org/images/cloud/bookworm/20230612-1409/debian-12-generic-amd64-20230612-1409.qcow2"
-  iso_checksum = "file:https://cloud.debian.org/images/cloud/bookworm/20230612-1409/SHA512SUMS"
+  iso_url      = "https://cloud.debian.org/images/cloud/bookworm/20230802-1460/debian-12-generic-amd64-20230802-1460.qcow2"
+  iso_checksum = "file:https://cloud.debian.org/images/cloud/bookworm/20230802-1460/SHA512SUMS"
   disk_image   = true
   headless     = true
   disk_size    = "10G"
