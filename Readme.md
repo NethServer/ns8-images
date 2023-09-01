@@ -8,6 +8,11 @@ Prerequisites
 * packer: https://developer.hashicorp.com/packer/downloads
 * qemu for qcow2 images: https://www.qemu.org/
 
+Prepare the environment, execute:
+```
+packer init .
+```
+
 ### Qcow2 images
 
 Supported Distro:
