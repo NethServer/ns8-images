@@ -17,6 +17,7 @@ build {
       "NS8_TWO_STEPS_INSTALL" : "1"
     }
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    expect_disconnect = true
     inline = [
       "curl https://raw.githubusercontent.com/NethServer/ns8-core/main/core/install.sh > install.sh",
       "chmod +x install.sh",
