@@ -120,5 +120,12 @@ destination = "/tmp/ns8-netplan-debian"
     ]
   }
 
+  provisioner "shell" {
+    inline = [
+      "sudo rm -rf /root/.ssh /home/debian/.ssh /home/rocky/.ssh || true",
+    ]
+  }
+
+
   post-processor "manifest" {}
 }
