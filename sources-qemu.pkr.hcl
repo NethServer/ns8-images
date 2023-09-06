@@ -3,7 +3,6 @@ source "qemu" "dn" {
   iso_checksum = "file:https://cloud.debian.org/images/cloud/bookworm/20230802-1460/SHA512SUMS"
   disk_image   = true
   headless     = true
-  disk_size    = "10G"
   qemuargs = [
     ["-smbios", "type=1,serial=ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/"]
   ]
@@ -22,7 +21,6 @@ source "qemu" "rl" {
   disk_image   = true
   headless     = true
   cpu_model    = "host"
-  disk_size    = "10G"
   qemuargs = [
     ["-smbios", "type=1,serial=ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/"]
   ]
