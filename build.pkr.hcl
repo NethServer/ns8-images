@@ -2,12 +2,8 @@ build {
 
   sources = [
     "source.digitalocean.rl",
-    "source.digitalocean.cs",
-    "source.digitalocean.al",
     "source.qemu.dn",
-    "source.qemu.cs",
     "source.qemu.rl",
-    "source.qemu.al",
   ]
 
   provisioner "shell" {
@@ -21,6 +17,7 @@ build {
       "NS8_TWO_STEPS_INSTALL" : "1"
     }
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    expect_disconnect = true
     inline = [
       "curl https://raw.githubusercontent.com/NethServer/ns8-core/main/core/install.sh > install.sh",
       "chmod +x install.sh",
@@ -122,6 +119,13 @@ destination = "/tmp/ns8-netplan-debian"
       "netplan apply",
     ]
   }
+
+  provisioner "shell" {
+    inline = [
+      "sudo rm -rf /root/.ssh /home/debian/.ssh /home/rocky/.ssh || true",
+    ]
+  }
+
 
   post-processor "manifest" {}
 }

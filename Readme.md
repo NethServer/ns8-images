@@ -8,14 +8,17 @@ Prerequisites
 * packer: https://developer.hashicorp.com/packer/downloads
 * qemu for qcow2 images: https://www.qemu.org/
 
+Prepare the environment, execute:
+```
+packer init .
+```
+
 ### Qcow2 images
 
 Supported Distro:
 
 * Debian 12 (`qemu.dn`)
-* Centos Stream 9.1 (`qemu.cs`)
-* RocKy Linux 9.1 (qemu.rl')
-* Alma Linux 9.1 (`qemu.al`)
+* RocKy Linux 9 (qemu.rl')
 
 Build all images:
 
@@ -26,15 +29,13 @@ packer build --only="qemu.*" .
 A specific image:
 
 ```
-packer build --only="qemu.cs" .
+packer build --only="qemu.rl" .
 ```
 ### DigitalOcean snapshots
 
 Supported Distro:
 
-* Centos Stream 9.1
-* RocKy Linux 9.1
-* Alma Linux 9.1
+* RocKy Linux 9
 
 Build all images:
 
@@ -46,5 +47,5 @@ packer build --only="digitalocean.*" .
 A specific image:
 
 ```
-packer build --only="digitalocean.cs" .
+packer build --only="digitalocean.rl" .
 ```
