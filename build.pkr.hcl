@@ -72,6 +72,12 @@ build {
   }
 
   provisioner "shell" {
+    only = ["qemu.rl"]
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = ["dnf remove cockpit-system cockpit-bridge cockpit-ws -y"]
+  }
+
+  provisioner "shell" {
     only = ["qemu.dn"]
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = ["rm -f /etc/netplan/*"]
