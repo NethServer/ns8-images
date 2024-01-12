@@ -127,6 +127,16 @@ destination = "/tmp/ns8-netplan-debian"
   }
 
   provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = [
+      "dd if=/dev/zero of=/swapfile bs=1M count=4096",
+      "chmod 600 /swapfile",
+      "mkswap /swapfile",
+      "echo /swapfile   swap    swap    defaults    0 0 >> /etc/fstab"
+    ]
+  }
+
+  provisioner "shell" {
     inline = [
       "sudo rm -rf /root/.ssh /home/debian/.ssh /home/rocky/.ssh || true",
     ]
