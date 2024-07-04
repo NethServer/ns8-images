@@ -16,14 +16,13 @@ source "qemu" "dn" {
 }
 
 source "qemu" "rl" {
-  iso_url      = "https://dl.rockylinux.org/pub/rocky/9.4/images/x86_64/Rocky-9-GenericCloud-Base-9.4-20240523.0.x86_64.qcow2"
-  iso_checksum = "sha256:39277948d53a10f1087454a1e0ed1c9bb48b48f6a4ddbf5113adc36f70be6730"
+  iso_url      = "https://dl.rockylinux.org/pub/rocky/9.4/images/x86_64/Rocky-9-GenericCloud-Base-9.4-20240509.0.x86_64.qcow2"
+  iso_checksum = "sha256:2b521fdff4e4d1a0f1a10b53579a34bba8081ce5eb08e64e3ff22289557f0cfa"
   disk_image   = true
   headless     = true
   cpu_model    = "host"
   qemuargs = [
-    ["-smbios", "type=1,serial=ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/"],
-    ["-boot",  "menu=on,splash-time=5000"]
+    ["-smbios", "type=1,serial=ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/"]
   ]
   http_content         = local.cloud-init
   ssh_username         = "rocky"
@@ -32,20 +31,4 @@ source "qemu" "rl" {
   disk_compression     = true
   output_directory     = "qemu_ns8_rl"
   vm_name              = "ns8-rocky-linux-9-${var.core_version}.qcow2"
-  boot_wait            = "4s"
-  boot_command = [
-    "c<wait>",
-    "load_video",
-    "<enter><wait>",
-    "set gfxpayload=keep",
-    "<enter><wait>",
-    "insmod gzio",
-    "<enter><wait>",
-    "linux ($root)/vmlinuz-5.14.0-427.16.1.el9_4.x86_64 console=ttyS0,115200n8 no_timer_check crashkernel=auto net.ifnames=0 root=LABEL=rocky ds=nocloud-net';'s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/",
-    "<enter><wait>",
-    "initrd ($root)/initramfs-5.14.0-427.16.1.el9_4.x86_64.img",
-    "<enter><wait>",
-    "boot",
-    "<enter><wait>"
-  ]
 }
