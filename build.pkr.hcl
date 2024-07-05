@@ -12,6 +12,17 @@ build {
     ]
   }
 
+
+  provisioner "shell" {
+    only = ["qemu.rl"]
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = [
+      "dnf install -y 'dnf-command(versionlock)'",
+      "dnf versionlock add cloud-init",
+    ]
+  }
+
+
   provisioner "shell" {
     env = {
       "NS8_TWO_STEPS_INSTALL" : "1"
@@ -75,6 +86,15 @@ build {
     only = ["qemu.rl"]
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = ["dnf remove cockpit-system cockpit-bridge cockpit-ws -y"]
+  }
+
+  provisioner "shell" {
+    only = ["qemu.rl"]
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = [
+      "dnf versionlock delete cloud-init",
+      "dnf remove -y 'dnf-command(versionlock)'",
+    ]
   }
 
   provisioner "shell" {
