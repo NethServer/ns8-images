@@ -6,6 +6,7 @@ local cloud-init {
     #cloud-config
     fqdn: node.ns8.test
     manage_etc_hosts: localhost
+    ssh_pwauth: True
     ssh_authorized_keys:
       - ${data.sshkey.install.public_key}
     chpasswd:

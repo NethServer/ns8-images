@@ -78,6 +78,7 @@ build {
     inline = [
       "rm install.sh",
       "cloud-init clean --logs --seed",
+      "rm -rvf /etc/ssh/sshd_config.d/50-cloud-init.conf",
       "echo uninitialized > /etc/machine-id",
     ]
   }
