@@ -12,14 +12,12 @@ build {
     ]
   }
 
-
   provisioner "shell" {
     only = ["qemu.rl"]
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       "dnf remove -y cockpit-system cockpit-bridge cockpit-ws",
-      "dnf install -y 'dnf-command(versionlock)'",
-      "dnf versionlock add cloud-init",
+      "dnf config-manager -v --save --setopt=exclude='kernel* kmod* microcode_ctl grub2*'",
     ]
   }
 
@@ -30,9 +28,7 @@ build {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     expect_disconnect = true
     inline = [
-      "curl https://raw.githubusercontent.com/NethServer/ns8-core/ns8-stable/core/install.sh > install.sh",
-      "chmod +x install.sh",
-      "./install.sh ${local.core_module}",
+      "curl https://raw.githubusercontent.com/NethServer/ns8-core/ns8-stable/core/install.sh | bash -s ${local.core_module}",
     ]
   }
 
@@ -41,13 +37,13 @@ build {
     [Unit]
     Wants=network-online.target
     After=network-online.target
-    ConditionFirstBoot=yes
-    ConditionPathExists=!/var/lib/nethserver/node/ready
     [Service]
     Type=oneshot
     ExecStart=/bin/bash /var/lib/nethserver/node/install-finalize.sh
-    ExecStartPost=/usr/bin/touch /var/lib/nethserver/node/ready
-    RemainAfterExit=yes
+    ExecStart=/usr/bin/systemctl disable ns8-install-finalize.service
+    ExecStart=/usr/bin/rm -f /etc/systemd/system/ns8-install-finalize.service
+    ExecStart=/usr/bin/systemctl daemon-reload
+    RemainAfterExit=no
     [Install]
     WantedBy=multi-user.target
     EOT
@@ -56,30 +52,10 @@ build {
 
   provisioner "shell" {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
-    inline = ["mv /tmp/ns8-install-finalize.service /etc/systemd/system/"]
-  }
-
-  provisioner "shell" {
-    except = ["qemu.dn"]
-    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
-    inline = [ "/sbin/restorecon -v /etc/systemd/system/ns8-install-finalize.service"]
-  }
-
-  provisioner "shell" {
-    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
+      "install /tmp/ns8-install-finalize.service /etc/systemd/system/",
       "systemctl daemon-reload",
       "systemctl enable ns8-install-finalize.service",
-    ]
-  }
-
-  provisioner "shell" {
-    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
-    inline = [
-      "rm install.sh",
-      "cloud-init clean --logs --seed",
-      "rm -rvf /etc/ssh/sshd_config.d/50-cloud-init.conf",
-      "echo uninitialized > /etc/machine-id",
     ]
   }
 
@@ -87,10 +63,8 @@ build {
     only = ["qemu.rl"]
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
-      "dnf versionlock delete cloud-init",
-      "dnf remove -y 'dnf-command(versionlock)'",
-      "dnf clean all",
-      "rm -rf /var/lib/dnf/repos/* /var/cache/dnf/*",
+      "dnf config-manager -v --save --setopt=exclude=",
+      "dnf clean -v all",
     ]
   }
 
@@ -149,16 +123,12 @@ destination = "/tmp/ns8-netplan-debian"
       "dd if=/dev/zero of=/swapfile bs=1M count=4096",
       "chmod 600 /swapfile",
       "mkswap /swapfile",
-      "echo /swapfile   swap    swap    defaults    0 0 >> /etc/fstab"
+      "echo /swapfile   swap    swap    defaults    0 0 >> /etc/fstab",
+      "cloud-init clean -c all --logs --seed --machine-id",
+      "rm -rvf /root/.ssh /home/rocky/.ssh /home/debian/.ssh",
+      "passwd -l rocky || :"
     ]
   }
-
-  provisioner "shell" {
-    inline = [
-      "sudo rm -rf /root/.ssh /home/debian/.ssh /home/rocky/.ssh || true",
-    ]
-  }
-
 
   post-processor "manifest" {}
 }
