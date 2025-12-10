@@ -16,8 +16,8 @@ source "qemu" "dn" {
 }
 
 source "qemu" "rl" {
-  iso_url      = "https://dl.rockylinux.org/pub/rocky/9.6/images/x86_64/Rocky-9-GenericCloud-Base-9.6-20250531.0.x86_64.qcow2"
-  iso_checksum = "sha256:2c72815bb83cadccbede4704780e9b52033722db8a45c3fb02130aa380690a3d"
+  iso_url      = "https://dl.rockylinux.org/pub/rocky/9.7/images/x86_64/Rocky-9-GenericCloud-Base-9.7-20251123.2.x86_64.qcow2"
+  iso_checksum = "sha256:15d81d3434b298142b2fdd8fb54aef2662684db5c082cc191c3c79762ed6360c"
   disk_image   = true
   headless     = true
   cpu_model    = "host"
