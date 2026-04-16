@@ -12,7 +12,7 @@ local cloud-init {
     chpasswd:
       expire: True
       list:
-      - root:RANDOM
+      - root:Nethesis,1234
     EOT
   }
 }

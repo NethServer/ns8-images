@@ -39,6 +39,7 @@ build {
     After=network-online.target
     [Service]
     Type=oneshot
+    ExecStart=-/bin/bash /etc/randompassword
     ExecStart=/bin/bash /var/lib/nethserver/node/install-finalize.sh
     ExecStart=/usr/bin/systemctl disable ns8-install-finalize.service
     ExecStart=/usr/bin/rm -f /etc/systemd/system/ns8-install-finalize.service
@@ -48,6 +49,32 @@ build {
     WantedBy=multi-user.target
     EOT
     destination = "/tmp/ns8-install-finalize.service"
+  }
+
+  provisioner "file" {
+    only = ["qemu.rl"]
+    content     = <<-EOT
+    #!/bin/bash
+    if [ -f /etc/passwordset ]; then
+      exit 0
+    fi
+    PASSWORD=$(tr -dc A-Xa-x0-9\!, < /dev/urandom | head -c 12 | xargs)
+    echo $PASSWORD | passwd --stdin root
+    echo -e "Generated root password:\n$PASSWORD\n" > /etc/issue.d/password.issue
+    passwd -e root
+    touch /etc/passwordset
+    EOT
+    destination = "/tmp/randompassword"
+  }
+
+  provisioner "shell" {
+    only = ["qemu.rl"]
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = [
+      "mv /tmp/randompassword /etc/",
+      "chmod +x /etc/randompassword",
+      "echo -e \"if [ -f /etc/issue.d/password.issue ]; then\n  rm -f /etc/issue.d/password.issue /etc/passwordset /etc/randompassword\nfi\" >> /root/.bash_profile",
+    ]
   }
 
   provisioner "shell" {
