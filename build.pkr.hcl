@@ -39,7 +39,7 @@ build {
     After=network-online.target
     [Service]
     Type=oneshot
-    ExecStart=-/bin/bash /etc/randompassword
+    ExecStart=/bin/bash -c 'if [ -f /etc/randompassword ]; then /bin/bash /etc/randompassword; fi'
     ExecStart=/bin/bash /var/lib/nethserver/node/install-finalize.sh
     ExecStart=/usr/bin/systemctl disable ns8-install-finalize.service
     ExecStart=/usr/bin/rm -f /etc/systemd/system/ns8-install-finalize.service
@@ -58,8 +58,8 @@ build {
     if [ -f /etc/passwordset ]; then
       exit 0
     fi
-    PASSWORD=$(tr -dc A-Xa-x0-9\!, < /dev/urandom | head -c 12 | xargs)
-    echo $PASSWORD | passwd --stdin root
+    PASSWORD=$(tr -dc A-HJ-Xa-km-x2-9\!0, < /dev/urandom | head -c 12 | xargs)
+    printf '%s\n' "$PASSWORD" | passwd --stdin root
     echo -e "Generated root password:\n$PASSWORD\n" > /etc/issue.d/password.issue
     passwd -e root
     touch /etc/passwordset
