@@ -39,7 +39,7 @@ build {
     After=network-online.target
     [Service]
     Type=oneshot
-    ExecStart=/bin/bash -c 'if [ -f /etc/randompassword ]; then /bin/bash /etc/randompassword; fi'
+    ExecStart=/bin/bash -c 'if [ ! -f /etc/issue.d/password.issue ]; then PASSWORD=$(tr -dc A-HJ-Xa-km-x2-9 < /dev/urandom | head -c 12); printf "%%s\n" "$PASSWORD" | passwd --stdin root; printf "Initial root password: $PASSWORD\n\n" > /etc/issue.d/password.issue; passwd -e root; fi'
     ExecStart=/bin/bash /var/lib/nethserver/node/install-finalize.sh
     ExecStart=/usr/bin/systemctl disable ns8-install-finalize.service
     ExecStart=/usr/bin/rm -f /etc/systemd/system/ns8-install-finalize.service
@@ -51,29 +51,11 @@ build {
     destination = "/tmp/ns8-install-finalize.service"
   }
 
-  provisioner "file" {
-    only = ["qemu.rl"]
-    content     = <<-EOT
-    #!/bin/bash
-    if [ -f /etc/passwordset ]; then
-      exit 0
-    fi
-    PASSWORD=$(tr -dc A-HJ-Xa-km-x2-9\!0, < /dev/urandom | head -c 12 | xargs)
-    printf '%s\n' "$PASSWORD" | passwd --stdin root
-    echo -e "Generated root password:\n$PASSWORD\n" > /etc/issue.d/password.issue
-    passwd -e root
-    touch /etc/passwordset
-    EOT
-    destination = "/tmp/randompassword"
-  }
-
   provisioner "shell" {
     only = ["qemu.rl"]
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
-      "mv /tmp/randompassword /etc/",
-      "chmod +x /etc/randompassword",
-      "echo -e \"if [ -f /etc/issue.d/password.issue ]; then\n  rm -f /etc/issue.d/password.issue /etc/passwordset /etc/randompassword\nfi\" >> /root/.bash_profile",
+      "echo 'rm -f /etc/issue.d/password.issue ; sed -i \"\\+rm -f /etc/issue.d/password.issue+ d\" /root/.bash_profile' >> /root/.bash_profile",
     ]
   }
 
