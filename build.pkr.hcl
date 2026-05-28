@@ -19,6 +19,52 @@ build {
     ]
   }
 
+  provisioner "file" {
+    content     = <<-EOT
+    [[registry]]
+    location = "127.0.0.1:5000"
+    insecure = true # allow push over plain-HTTP
+
+    [[registry]]
+    location = "docker.io"
+    [[registry.mirror]]
+    location = "127.0.0.1:5000/docker.io"
+    insecure = true
+    [[registry.mirror]]
+    location = "ghcr.io/nethserver/docker.io"
+    EOT
+    destination = "/tmp/801-local-registry.conf"
+  }
+
+  provisioner "file" {
+    content     = <<-EOT
+    install -v -t /etc/containers/registries.conf.d/ /tmp/801-local-registry.conf
+    rm -vf /tmp/801-local-registry.conf
+    podman pull ${var.docker_registry}
+    podman pull ${local.traefik_module}
+    podman run -d --rm \
+      --init \
+      --network=host \
+      --name local-registry \
+      --volume local-registry:/var/lib/registry:z \
+      ${var.docker_registry}
+    until curl -fs http://127.0.0.1:5000/v2/ >/dev/null 2>&1; do sleep 1 ; done
+    module_images=($(podman image inspect "${local.traefik_module}" | jq -r '.[0].Labels["org.nethserver.images"]'))
+    for image in "$${module_images[@]}" ; do
+      image_id=$(podman pull "$${image}")
+      # Normalize docker.io/image:tag -> docker.io/library/image:tag
+      image=$(podman image inspect "$${image_id}" | jq -r '.[0].RepoTags[0]')
+      podman tag "$${image}" "127.0.0.1:5000/$${image}"
+      podman push "127.0.0.1:5000/$${image}"
+      podman rmi "$${image}"
+      podman rmi "127.0.0.1:5000/$${image}"
+    done
+    podman stop local-registry
+    rm -vf /tmp/local-registry-init.sh
+    EOT
+    destination = "/tmp/local-registry-init.sh"
+  }
+
   provisioner "shell" {
     env = {
       "NS8_TWO_STEPS_INSTALL" : "1"
@@ -26,21 +72,50 @@ build {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     expect_disconnect = true
     inline = [
-      "curl https://raw.githubusercontent.com/NethServer/ns8-core/ns8-stable/core/install.sh | bash -s ${local.core_module}",
+      "curl https://raw.githubusercontent.com/NethServer/ns8-core/ns8-stable/core/install.sh | bash -s ${local.core_module} ${local.traefik_module}",
+      "bash -x /tmp/local-registry-init.sh",
     ]
   }
 
   provisioner "file" {
     content     = <<-EOT
     [Unit]
-    Wants=network-online.target
-    After=network-online.target
+    Description=Local Image Registry Cache
+    [Service]
+    Type=forking
+    ExecStart=podman run --detach \
+      --rm \
+      --replace \
+      --init \
+      --cgroups=no-conmon \
+      --network=host \
+      --name local-registry \
+      --volume local-registry:/var/lib/registry:z \
+      ${var.docker_registry}
+    SuccessExitStatus=143
+    ExecStartPost=bash -c 'until curl -fs http://127.0.0.1:5000/v2/ >/dev/null 2>&1; do sleep 1 ; done'
+    ExecStop=podman stop --ignore -t 10 local-registry
+    EOT
+    destination = "/tmp/local-registry.service"
+  }
+
+  provisioner "file" {
+    content     = <<-EOT
+    [Unit]
+    Wants=network-online.target local-registry.service
+    After=network-online.target local-registry.service
     [Service]
     Type=oneshot
     ExecStart=/bin/bash -c 'if [ ! -f /etc/issue.d/password.issue ]; then PASSWORD=$(tr -dc A-HJ-Xa-km-x2-9 < /dev/urandom | head -c 12); printf "%%s\n" "$PASSWORD" | passwd --stdin root; printf "Initial root password: $PASSWORD\n\n" > /etc/issue.d/password.issue; passwd -e root; fi'
-    ExecStart=/bin/bash /var/lib/nethserver/node/install-finalize.sh
+    ExecStart=/bin/bash /var/lib/nethserver/node/install-finalize.sh ${local.traefik_module}
     ExecStart=/usr/bin/systemctl disable ns8-install-finalize.service
-    ExecStart=/usr/bin/rm -f /etc/systemd/system/ns8-install-finalize.service
+    ExecStart=/usr/bin/systemctl stop local-registry
+    ExecStart=podman volume rm -f local-registry
+    ExecStart=podman rmi ${var.docker_registry}
+    ExecStart=/usr/bin/rm -f \
+      /etc/systemd/system/ns8-install-finalize.service \
+      /etc/systemd/system/local-registry.service \
+      /etc/containers/registries.conf.d/801-local-registry.conf
     ExecStart=/usr/bin/systemctl daemon-reload
     RemainAfterExit=no
     [Install]
@@ -60,7 +135,8 @@ build {
   provisioner "shell" {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
-      "install /tmp/ns8-install-finalize.service /etc/systemd/system/",
+      "install -v -t /etc/systemd/system/ /tmp/*.service",
+      "rm -vf /tmp/*.service",
       "systemctl daemon-reload",
       "systemctl enable ns8-install-finalize.service",
     ]

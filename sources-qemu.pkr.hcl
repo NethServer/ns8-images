@@ -13,5 +13,5 @@ source "qemu" "rl" {
   shutdown_command     = "sudo shutdown -P now"
   disk_compression     = true
   output_directory     = "qemu_ns8_rl"
-  vm_name              = "ns8-rocky-linux-9-${var.core_version}.qcow2"
+  vm_name              = "ns8-rocky-linux-9-ns8-stable.qcow2"
 }
