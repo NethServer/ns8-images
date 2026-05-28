@@ -17,8 +17,7 @@ packer init .
 
 Supported Distro:
 
-* Debian 12 (`qemu.dn`)
-* RocKy Linux 9 (qemu.rl')
+* Rocky Linux 9 (qemu.rl')
 
 Build all images:
 
@@ -30,22 +29,4 @@ A specific image:
 
 ```
 packer build --only="qemu.rl" .
-```
-### DigitalOcean snapshots
-
-Supported Distro:
-
-* RocKy Linux 9
-
-Build all images:
-
-```
-export DIGITALOCEAN_TOKEN=<DO_TOKEN>
-packer build --only="digitalocean.*" .
-```
-
-A specific image:
-
-```
-packer build --only="digitalocean.rl" .
 ```
