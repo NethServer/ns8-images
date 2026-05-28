@@ -74,6 +74,7 @@ build {
     inline = [
       "curl https://raw.githubusercontent.com/NethServer/ns8-core/ns8-stable/core/install.sh | bash -s ${local.core_module} ${local.traefik_module}",
       "bash -x /tmp/local-registry-init.sh",
+      "printf 'Setup in progress. Type Ctrl+D to refresh this prompt.\n\n' > /etc/issue.d/password.issue",
     ]
   }
 
@@ -106,7 +107,7 @@ build {
     After=network-online.target local-registry.service
     [Service]
     Type=oneshot
-    ExecStart=/bin/bash -c 'if [ ! -f /etc/issue.d/password.issue ]; then PASSWORD=$(tr -dc A-HJ-Xa-km-x2-9 < /dev/urandom | head -c 12); printf "%%s\n" "$PASSWORD" | passwd --stdin root; printf "Initial root password: $PASSWORD\n\n" > /etc/issue.d/password.issue; passwd -e root; fi'
+    ExecStart=/bin/bash -c 'PASSWORD=$(tr -dc A-HJ-Xa-km-x2-9 < /dev/urandom | head -c 12); printf "%%s\n" "$PASSWORD" | passwd --stdin root; printf "Initial root password: $PASSWORD\n\n" > /etc/issue.d/password.issue; passwd -e root'
     ExecStart=/bin/bash /var/lib/nethserver/node/install-finalize.sh ${local.traefik_module}
     ExecStart=/usr/bin/systemctl disable ns8-install-finalize.service
     ExecStart=/usr/bin/systemctl stop local-registry
