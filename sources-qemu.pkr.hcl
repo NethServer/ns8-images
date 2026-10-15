@@ -3,7 +3,9 @@ source "qemu" "rl" {
   iso_checksum = "sha256:92c206cc6f790c61583247eefe87890f8828420662c17cacf247cec78ab4eec8"
   disk_image   = true
   headless     = true
+  accelerator  = "kvm"
   cpu_model    = "host"
+  cpus         = 2
   memory       = 2048
   qemuargs = [
     ["-smbios", "type=1,serial=ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/"]
