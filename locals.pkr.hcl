@@ -26,7 +26,7 @@ local core_component {
 }
 
 local core_version {
-  expression = split(
+  expression = var.core_version != "" ? var.core_version : split(
     "|",
     reverse(sort([
       for version in local.core_component.versions :

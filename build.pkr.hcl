@@ -48,7 +48,7 @@ build {
       --name local-registry \
       --volume local-registry:/var/lib/registry:z \
       ${var.docker_registry}
-    until curl -fs http://127.0.0.1:5000/v2/ >/dev/null 2>&1; do sleep 1 ; done
+    timeout 120 bash -c 'until curl -fs http://127.0.0.1:5000/v2/ >/dev/null 2>&1; do sleep 1 ; done'
     module_images=($(podman image inspect "${local.traefik_module}" | jq -r '.[0].Labels["org.nethserver.images"]'))
     for image in "$${module_images[@]}" ; do
       image_id=$(podman pull "$${image}")
@@ -73,7 +73,7 @@ build {
     expect_disconnect = true
     inline = [
       "curl https://raw.githubusercontent.com/NethServer/ns8-core/ns8-stable/core/install.sh | bash -s ${local.core_module} ${local.traefik_module}",
-      "bash -x /tmp/local-registry-init.sh",
+      "bash -xe /tmp/local-registry-init.sh",
       "printf 'Setup in progress. Type Ctrl+D to refresh this prompt.\n\n' > /etc/issue.d/password.issue",
     ]
   }
