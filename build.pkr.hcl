@@ -73,7 +73,6 @@ build {
     expect_disconnect = true
     inline = [
       "curl https://raw.githubusercontent.com/NethServer/ns8-core/ns8-stable/core/install.sh | bash -s ${local.core_module} ${local.traefik_module}",
-      "systemctl daemon-reexec",
       "bash -xe /tmp/local-registry-init.sh",
       "printf 'Setup in progress. Type Ctrl+D to refresh this prompt.\n\n' > /etc/issue.d/password.issue",
     ]

@@ -4,6 +4,7 @@ source "qemu" "rl" {
   disk_image   = true
   headless     = true
   cpu_model    = "host"
+  memory       = 2048
   qemuargs = [
     ["-smbios", "type=1,serial=ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/"]
   ]
